@@ -20,7 +20,7 @@ export async function loadESModules() {
   }
 }
 
-export async function requestRandomness(privateKey: string, infura: string, SecretPathAddress: string ): Promise<void> {
+export async function requestRandomness(privateKey: string, endpoint: string, secretPathAddress: string, randomNumbers: String ): Promise<void> {
   const modules = await loadESModules();
   if (!modules) {
     console.log("Required modules could not be loaded.");
@@ -38,12 +38,12 @@ export async function requestRandomness(privateKey: string, infura: string, Secr
     base64_to_bytes,
   } = modules.belt;
 
-    const routing_contract = "secret1avqpms9xmmjssemvtr53rrzmdz7nfp37jsw08w";
-    const routing_code_hash = "202d9dfe2f14ff57c05d52fc6470f3b314eb0e5f7f605b8f4ad6d9a26901531d";
+    const routing_contract = "secret10jgj4jduv82ua05aw948w6a26sq4zqqrs6ae7j";
+    const routing_code_hash = "6f44e8cee8c1e6c536e3cfb5cb1264c14839100f46e0776f5c8eee7f07993569";
     const iface = new ethers.utils.Interface(abi);
 
     const provider = new ethers.providers.JsonRpcProvider(
-     infura
+     endpoint
     );
     // Create a wallet instance from a private key
     const my_wallet = new ethers.Wallet(privateKey, provider);
@@ -71,10 +71,11 @@ export async function requestRandomness(privateKey: string, infura: string, Secr
   const handle = "request_random";
 
   const data = JSON.stringify({
-   index: "0"
+   random_numbers: randomNumbers,
+   wallet_address: myAddress, 
   });
 
-  let publicClientAddress = "0x3879E146140b627a5C858a08e507B171D9E43139"
+  let publicClientAddress = secretPathAddress; 
 
   const callbackAddress = publicClientAddress.toLowerCase();
   //This is an empty callback for the sake of having a callback in the sample code.
@@ -198,4 +199,18 @@ export async function requestRandomness(privateKey: string, infura: string, Secr
 
   }
 
+  // export async function queryRandomness(): Promise<void> {
+  //   const secretjs = new SecretNetworkClient({
+  //     url: "https://lcd.testnet.secretsaturn.net",
+  //     chainId: "pulsar-3",
+  //   })
+  
+  //   const query_tx = await secretjs.query.compute.queryContract({
+  //     contract_address: process.env.SECRET_ADDRESS,
+  //     code_hash: process.env.CODE_HASH,
+  //     query: { retrieve_random: {} },
+  //   })
+  //   console.log(query_tx)
+
+  // }
  

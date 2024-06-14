@@ -1,6 +1,6 @@
 {
   "name": "secret-network-ccl",
-  "version": "0.0.6",
+  "version": "0.2.0",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -17,7 +17,6 @@
   "license": "MIT",
   "description": "Secret Network's Confidential Comutation Layer - Random Number Generator",
   "devDependencies": {
-
     "tsup": "^8.1.0",
     "typescript": "^5.4.5"
   },
@@ -26,6 +25,7 @@
     "@solar-republic/cosmos-grpc": "^0.15.3",
     "@solar-republic/neutrino": "^1.2.4",
     "ethers": "^5.7.2",
+    "secretjs": "^1.12.5",
     "secure-random": "^1.1.2"
   }
 }

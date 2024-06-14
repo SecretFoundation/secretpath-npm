@@ -1,6 +1,6 @@
 {
   "name": "secret-network-ccl",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -15,7 +15,7 @@
   ],
   "author": "Secret Network Foundation",
   "license": "MIT",
-  "description": "Secret Network's Confidential Comutation Layer - Random Number Generator",
+  "description": "Secret Network's Confidential Comutation Layer",
   "devDependencies": {
     "tsup": "^8.1.0",
     "typescript": "^5.4.5"

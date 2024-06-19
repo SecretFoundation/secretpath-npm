@@ -22,7 +22,7 @@ let privateKey = process.env.PRIVATE_KEY;
 
 // your API endpoint
 
-let endpoint = "https://sepolia.infura.io/v3/${process.env.API_KEY}";
+let endpoint = `https://sepolia.infura.io/v3/${process.env.API_KEY}`;
 
 // the EVM chain that you want to use (see connected chains
 [here](https://docs.scrt.network/secret-network-documentation/confidential-computing-layer/ethereum-evm-developer-toolkit/supported-networks))
@@ -33,8 +33,8 @@ let secretPathAddress = process.env.SECRET_NETWORK_ADDRESS
 ```
 const {encryptData} = require('./node_modules/secret-network-ccl')
 
-let privateKey = "5766fa81916aba1909042bc1ddbbcb0609abaa2f8412f02702c36af11dbb5edb";
-let endpoint = "https://sepolia.infura.io/v3/7bb38f598ae5404ebc844325edec7c4e";
+let privateKey = "";
+let endpoint = "https://sepolia.infura.io/v3/${process.env.API_KEY}";;
 let secretPathAddress = "0x3879E146140b627a5C858a08e507B171D9E43139";
 let data = "I want to encrypt this data";
 let password = "1234";
@@ -69,13 +69,15 @@ let query = async () => {
 // import the ccl package 
 const {requestRandomness} = require('./node_modules/secret-network-ccl')
 
+let privateKey = "";
+let endpoint = "https://sepolia.infura.io/v3/${process.env.API_KEY}";;
+let secretPathAddress = "0x3879E146140b627a5C858a08e507B171D9E43139";
+let numbers = "13"
+
 requestRandomness(privateKey, endpoint, secretPathAddress, numbers); 
 
 
-`numbers` is a `String` of numbers between 1-65535 which will be returned as an `array` of `u16` 
-
-
-let numbers = "13"
+`numbers` must be a `String` of numbers between 1-65535 which will be returned as an `array` of `u16` 
 
 // this returns
 

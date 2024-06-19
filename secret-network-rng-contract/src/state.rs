@@ -16,6 +16,7 @@ pub struct State {
 pub struct Input {
     pub random_numbers: String,
     pub wallet_address: String, 
+    pub max: String, 
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

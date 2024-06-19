@@ -9,6 +9,14 @@ const {
   computeAddress
 } = require("ethers/lib/utils");
 
+const { SecretNetworkClient } = require("secretjs");
+
+declare global {
+  interface Window {
+    ethereum: any;
+  }
+}
+
 export async function loadESModules() {
   try {
     const neutrino = await import("@solar-republic/neutrino");
@@ -20,7 +28,7 @@ export async function loadESModules() {
   }
 }
 
-export async function requestRandomness(privateKey: string, endpoint: string, secretPathAddress: string, randomNumbers: String ): Promise<void> {
+export async function requestRandomness(privateKey: string, endpoint: string, secretPathAddress: string, randomNumbers: String, max: String ): Promise<void> {
   const modules = await loadESModules();
   if (!modules) {
     console.log("Required modules could not be loaded.");
@@ -38,8 +46,8 @@ export async function requestRandomness(privateKey: string, endpoint: string, se
     base64_to_bytes,
   } = modules.belt;
 
-    const routing_contract = "secret10jgj4jduv82ua05aw948w6a26sq4zqqrs6ae7j";
-    const routing_code_hash = "6f44e8cee8c1e6c536e3cfb5cb1264c14839100f46e0776f5c8eee7f07993569";
+    const routing_contract = "secret1t5fktxrmkzkw4a44ssuyc84per4hc0jk93gwnd";
+    const routing_code_hash = "81b04bfb2ca756e135201152081a113e4c333648e7088558777a2743f382c566";
     const iface = new ethers.utils.Interface(abi);
 
     const provider = new ethers.providers.JsonRpcProvider(
@@ -73,6 +81,7 @@ export async function requestRandomness(privateKey: string, endpoint: string, se
   const data = JSON.stringify({
    random_numbers: randomNumbers,
    wallet_address: myAddress, 
+   max: max
   });
 
   let publicClientAddress = secretPathAddress; 
@@ -378,18 +387,226 @@ export async function requestRandomness(privateKey: string, endpoint: string, se
   
     }
 
-  // export async function queryRandomness(): Promise<void> {
-  //   const secretjs = new SecretNetworkClient({
-  //     url: "https://lcd.testnet.secretsaturn.net",
-  //     chainId: "pulsar-3",
-  //   })
+    export async function executeSecretContract(
+      privateKey: string, 
+      endpoint: string, 
+      secretPathAddress: string, 
+      contractAddress: string, 
+      codeHash: string, 
+      executeHandle: string,
+      string1?: { key: string, value: string }, 
+      string2?: { key: string, value: string }, 
+      string3?: { key: string, value: string },
+      string4?: { key: string, value: string },
+      string5?: { key: string, value: string },
+      string6?: { key: string, value: string }
+    ): Promise<void> {
+      const modules = await loadESModules();
+      if (!modules) {
+        console.log("Required modules could not be loaded.");
+        return;
+      }
+    
+      const { ecdh, chacha20_poly1305_seal } = modules.neutrino;
+      const {
+        bytes,
+        bytes_to_base64,
+        json_to_bytes,
+        sha256,
+        concat,
+        text_to_bytes,
+        base64_to_bytes,
+      } = modules.belt;
+    
+      const routing_contract = contractAddress;
+      const routing_code_hash = codeHash;
+      const iface = new ethers.utils.Interface(abi);
+    
+      const provider = new ethers.providers.JsonRpcProvider(endpoint);
+      const my_wallet = new ethers.Wallet(privateKey, provider);
+      const myAddress = my_wallet.address;
+    
+      // Generating ephemeral keys
+      const wallet = ethers.Wallet.createRandom();
+      const userPrivateKeyBytes = arrayify(wallet.privateKey);
+      const userPublicKey = new SigningKey(wallet.privateKey).compressedPublicKey;
+      const userPublicKeyBytes = arrayify(userPublicKey);
+    
+      // Gateway Encryption key for ChaCha20-Poly1305 Payload encryption
+      const gatewayPublicKey = "A20KrD7xDmkFXpNMqJn1CLpRaDLcdKpO1NdBBS7VpWh3";
+      const gatewayPublicKeyBytes = base64_to_bytes(gatewayPublicKey);
+    
+      // create the sharedKey via ECDH
+      const sharedKey = await sha256(
+        ecdh(userPrivateKeyBytes, gatewayPublicKeyBytes)
+      );
+    
+      const callback_gas_limit = 300000;
+    
+      // the function name of the function that is called on the private contract
+      const handle = executeHandle; 
+    
+      // Building the data object dynamically
+      const data: { [key: string]: string } = {};
+      if (string1) data[string1.key] = string1.value;
+      if (string2) data[string2.key] = string2.value;
+      if (string3) data[string3.key] = string3.value;
+      if (string4) data[string4.key] = string4.value;
+      if (string5) data[string5.key] = string5.value;
+      if (string6) data[string6.key] = string6.value;
+    
+      const jsonData = JSON.stringify(data);
+    
+      let publicClientAddress = secretPathAddress; 
+      const callbackAddress = publicClientAddress.toLowerCase();
+      const callbackSelector = iface.getSighash(iface.getFunction("upgradeHandler"));
+      const callbackGasLimit = Number(callback_gas_limit);
+    
+      const payload = {
+        data: jsonData,
+        routing_info: routing_contract,
+        routing_code_hash: routing_code_hash,
+        user_address: myAddress,
+        user_key: bytes_to_base64(userPublicKeyBytes),
+        callback_address: bytes_to_base64(arrayify(callbackAddress)),
+        callback_selector: bytes_to_base64(arrayify(callbackSelector)),
+        callback_gas_limit: callbackGasLimit,
+      };
+    
+      const payloadJson = JSON.stringify(payload);
+      const plaintext = json_to_bytes(payload);
+    
+      const nonce = crypto.getRandomValues(bytes(12));
+    
+      const [ciphertextClient, tagClient] = chacha20_poly1305_seal(
+        sharedKey,
+        nonce,
+        plaintext
+      );
+      const ciphertext = concat([ciphertextClient, tagClient]);
+    
+      const ciphertextHash = keccak256(ciphertext);
+    
+      const payloadHash = keccak256(
+        concat([
+          text_to_bytes("\x19Ethereum Signed Message:\n32"),
+          arrayify(ciphertextHash),
+        ])
+      );
+    
+      const msgParams = ciphertextHash;
+      const from = myAddress;
+      const params = [from, msgParams];
+      const method = "personal_sign";
+      console.log(`Payload Hash: ${payloadHash}`);
+    
+      const messageArrayified = ethers.utils.arrayify(ciphertextHash);
+      const payloadSignature = await my_wallet.signMessage(messageArrayified);
+      console.log(`Payload Signature: ${payloadSignature}`);
+    
+      const user_pubkey = recoverPublicKey(payloadHash, payloadSignature);
+      console.log(`Recovered public key: ${user_pubkey}`);
+      console.log(
+        `Verify this matches the user address: ${computeAddress(user_pubkey)}`
+      );
+    
+      const _userAddress = myAddress;
+      const _routingInfo = routing_contract;
+      const _payloadHash = payloadHash;
+      const _info = {
+        user_key: hexlify(userPublicKeyBytes),
+        user_pubkey: user_pubkey,
+        routing_code_hash: routing_code_hash,
+        task_destination_network: "pulsar-3",
+        handle: handle,
+        nonce: hexlify(nonce),
+        payload: hexlify(ciphertext),
+        payload_signature: payloadSignature,
+        callback_gas_limit: Number(callbackGasLimit),
+      };
+    
+      console.log(`_userAddress: ${_userAddress}
+      _routingInfo: ${_routingInfo} 
+      _payloadHash: ${_payloadHash} 
+      _info: ${JSON.stringify(_info)}
+      _callbackAddress: ${callbackAddress},
+      _callbackSelector: ${callbackSelector} ,
+      _callbackGasLimit: ${callbackGasLimit}`);
+    
+      const functionData = iface.encodeFunctionData("send", [
+        _payloadHash,
+        _userAddress,
+        _routingInfo,
+        _info,
+      ]);
+    
+      const gasFee = await provider.getGasPrice();
+      const amountOfGas = gasFee.mul(callbackGasLimit).mul(3).div(2);
+    
+      const tx = {
+        gasLimit: ethers.utils.hexlify(150000),
+        to: publicClientAddress,
+        value: ethers.utils.hexlify(amountOfGas),
+        data: functionData,
+      };
+    
+      try {
+        const txResponse = await my_wallet.sendTransaction(tx);
+        console.log(`Transaction sent! Hash: ${txResponse.hash}`);
+    
+        const receipt = await txResponse.wait();
+        console.log(`Transaction confirmed! Block Number: ${receipt.blockNumber}`);
+      } catch (error) {
+        console.error(`Error sending transaction: ${error}`);
+      }
+    }
+    
+  export async function queryRandomness(): Promise<void> {
+    const secretjs = new SecretNetworkClient({
+      url: "https://lcd.testnet.secretsaturn.net",
+      chainId: "pulsar-3",
+    })
   
-  //   const query_tx = await secretjs.query.compute.queryContract({
-  //     contract_address: process.env.SECRET_ADDRESS,
-  //     code_hash: process.env.CODE_HASH,
-  //     query: { retrieve_random: {} },
-  //   })
-  //   console.log(query_tx)
+    const query_tx = await secretjs.query.compute.queryContract({
+      contract_address: "secret10jgj4jduv82ua05aw948w6a26sq4zqqrs6ae7j",
+      code_hash:  "6f44e8cee8c1e6c536e3cfb5cb1264c14839100f46e0776f5c8eee7f07993569",
+      query: { retrieve_random: {} },
+    })
+    console.log(query_tx)
 
-  // }
- 
+  }
+
+  export async function querySecretContract(
+    contractAddress: string, 
+    codeHash: string, 
+    queryName: string, 
+    queryParameter1?: string, 
+    queryParameter2?: string, 
+    queryParameter3?: string,
+    queryParameter4?: string,
+    queryParameter5?: string,
+    queryParameter6?: string
+  ): Promise<void> {
+    const secretjs = new SecretNetworkClient({
+      url: "https://lcd.testnet.secretsaturn.net",
+      chainId: "pulsar-3",
+    });
+  
+    // Building the dynamic query object
+    const query: any = { [queryName]: {} };
+  
+    // Adding optional parameters to the query
+    if (queryParameter1) query[queryName].param1 = queryParameter1;
+    if (queryParameter2) query[queryName].param2 = queryParameter2;
+    if (queryParameter3) query[queryName].param3 = queryParameter3;
+    if (queryParameter4) query[queryName].param4 = queryParameter4;
+    if (queryParameter5) query[queryName].param5 = queryParameter5;
+    if (queryParameter6) query[queryName].param6 = queryParameter6;
+  
+    const query_tx = await secretjs.query.compute.queryContract({
+      contract_address: contractAddress,
+      code_hash: codeHash,
+      query: query,
+    });
+    console.log(query_tx);
+  }

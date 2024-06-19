@@ -92,7 +92,10 @@ fn try_random(
     let wallet_address = input.wallet_address;
 
     let random_numbers = input.random_numbers.parse::<u16>()
-    .map_err(|err| StdError::generic_err(format!("Invalid index: {}", err)))?;
+        .map_err(|err| StdError::generic_err(format!("Invalid index: {}", err)))?;
+    
+    let max_random = input.max.parse::<u16>()
+        .map_err(|err| StdError::generic_err(format!("Invalid max: {}", err)))?;
 
     let raw_random_u8 = env.block.random.unwrap().0[0]; // Original random number from blockchain
     let entropy_bytes = env.block.time.to_string();
@@ -102,7 +105,7 @@ fn try_random(
 
     let rand_bytes = rng.rand_bytes();
 
-    let random_u16 = generate_random_numbers(random_numbers, rand_bytes);
+    let random_u16 = generate_random_numbers(random_numbers, max_random, rand_bytes);
 
     let random = Random {
         random: random_u16.clone(),
@@ -110,7 +113,7 @@ fn try_random(
     };
 
     STORED_RANDOM.add_suffix(wallet_address.as_bytes())
-    .insert(deps.storage, &true, &random)?;
+        .insert(deps.storage, &true, &random)?;
 
     let result = base64::encode(vec_u16_to_string(random_u16));
 
@@ -134,15 +137,16 @@ fn try_random(
 
 fn try_random_query(deps: Deps, wallet: String) -> StdResult<Binary> {
     let value = STORED_RANDOM
-    .add_suffix(wallet.as_bytes())
-.get(deps.storage, &true)
+        .add_suffix(wallet.as_bytes())
+        .get(deps.storage, &true)
         .ok_or_else(|| StdError::generic_err("Value not found"))?;
 
     to_binary(&ResponseRetrieveRandomMsg {
         random_numbers: value.random.clone(),
     })
 }
-fn generate_random_numbers(count: u16, seed_array: [u8; 32]) -> Vec<u16> {
+
+fn generate_random_numbers(count: u16, max: u16, seed_array: [u8; 32]) -> Vec<u16> {
     let mut random_numbers = Vec::with_capacity(count as usize);
     let mut seed_index = 0;
 
@@ -150,8 +154,8 @@ fn generate_random_numbers(count: u16, seed_array: [u8; 32]) -> Vec<u16> {
         // Combine two u8 values to form a u16 value
         let raw_value = ((seed_array[seed_index] as u16) << 8) | (seed_array[(seed_index + 1) % 32] as u16);
         
-        // Scale the value to the range 1 to count (inclusive)
-        let value = 1 + (raw_value % count);
+        // Scale the value to the range 1 to max (inclusive)
+        let value = 1 + (raw_value % max);
         random_numbers.push(value);
         
         // Move to the next index in the seed array
@@ -167,4 +171,3 @@ fn vec_u16_to_string(vec: Vec<u16>) -> String {
        .collect::<Vec<String>>()
        .join(" ")
 }
-

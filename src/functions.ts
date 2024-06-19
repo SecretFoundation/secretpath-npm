@@ -388,12 +388,7 @@ export async function requestRandomness(privateKey: string, endpoint: string, se
       contractAddress: string, 
       codeHash: string, 
       executeHandle: string,
-      string1?: { key: string, value: string }, 
-      string2?: { key: string, value: string }, 
-      string3?: { key: string, value: string },
-      string4?: { key: string, value: string },
-      string5?: { key: string, value: string },
-      string6?: { key: string, value: string }
+      ...strings: { key: string, value: string }[]
     ): Promise<void> {
       const modules = await loadESModules();
       if (!modules) {
@@ -442,12 +437,9 @@ export async function requestRandomness(privateKey: string, endpoint: string, se
     
       // Building the data object dynamically
       const data: { [key: string]: string } = {};
-      if (string1) data[string1.key] = string1.value;
-      if (string2) data[string2.key] = string2.value;
-      if (string3) data[string3.key] = string3.value;
-      if (string4) data[string4.key] = string4.value;
-      if (string5) data[string5.key] = string5.value;
-      if (string6) data[string6.key] = string6.value;
+      strings.forEach(string => {
+        if (string) data[string.key] = string.value;
+      });
     
       const jsonData = JSON.stringify(data);
     
@@ -554,6 +546,7 @@ export async function requestRandomness(privateKey: string, endpoint: string, se
         console.error(`Error sending transaction: ${error}`);
       }
     }
+    
     
   export async function queryRandomness(wallet: string): Promise<void> {
     const secretjs = new SecretNetworkClient({

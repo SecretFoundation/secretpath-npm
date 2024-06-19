@@ -11,12 +11,6 @@ const {
 
 const { SecretNetworkClient } = require("secretjs");
 
-declare global {
-  interface Window {
-    ethereum: any;
-  }
-}
-
 export async function loadESModules() {
   try {
     const neutrino = await import("@solar-republic/neutrino");
@@ -561,31 +555,25 @@ export async function requestRandomness(privateKey: string, endpoint: string, se
       }
     }
     
-  export async function queryRandomness(): Promise<void> {
+  export async function queryRandomness(wallet: string): Promise<void> {
     const secretjs = new SecretNetworkClient({
       url: "https://lcd.testnet.secretsaturn.net",
       chainId: "pulsar-3",
     })
   
     const query_tx = await secretjs.query.compute.queryContract({
-      contract_address: "secret10jgj4jduv82ua05aw948w6a26sq4zqqrs6ae7j",
-      code_hash:  "6f44e8cee8c1e6c536e3cfb5cb1264c14839100f46e0776f5c8eee7f07993569",
-      query: { retrieve_random: {} },
+      contract_address: "secret1t5fktxrmkzkw4a44ssuyc84per4hc0jk93gwnd",
+      code_hash:  "81b04bfb2ca756e135201152081a113e4c333648e7088558777a2743f382c566",
+      query: { retrieve_random: {wallet} },
     })
     console.log(query_tx)
-
-  }
+  };
 
   export async function querySecretContract(
     contractAddress: string, 
     codeHash: string, 
     queryName: string, 
-    queryParameter1?: string, 
-    queryParameter2?: string, 
-    queryParameter3?: string,
-    queryParameter4?: string,
-    queryParameter5?: string,
-    queryParameter6?: string
+    queryParameters?: { [key: string]: string | number }
   ): Promise<void> {
     const secretjs = new SecretNetworkClient({
       url: "https://lcd.testnet.secretsaturn.net",
@@ -596,12 +584,11 @@ export async function requestRandomness(privateKey: string, endpoint: string, se
     const query: any = { [queryName]: {} };
   
     // Adding optional parameters to the query
-    if (queryParameter1) query[queryName].param1 = queryParameter1;
-    if (queryParameter2) query[queryName].param2 = queryParameter2;
-    if (queryParameter3) query[queryName].param3 = queryParameter3;
-    if (queryParameter4) query[queryName].param4 = queryParameter4;
-    if (queryParameter5) query[queryName].param5 = queryParameter5;
-    if (queryParameter6) query[queryName].param6 = queryParameter6;
+    if (queryParameters) {
+      for (const [key, value] of Object.entries(queryParameters)) {
+        query[queryName][key] = value;
+      }
+    }
   
     const query_tx = await secretjs.query.compute.queryContract({
       contract_address: contractAddress,
@@ -610,3 +597,4 @@ export async function requestRandomness(privateKey: string, endpoint: string, se
     });
     console.log(query_tx);
   }
+  

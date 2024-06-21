@@ -1,7 +1,6 @@
 /src
 /node_modules
 
-/secret-network-rng-contract
 .DS_Store
 
 tsconfig.json

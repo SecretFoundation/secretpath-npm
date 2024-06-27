@@ -7,7 +7,7 @@ A complete, compact, and simple encryption + RNG toolkit for EVM chains, written
 - Data encryption (key/value store) on EVM
 - Generate on-chain verifiable randomness on EVM  
 - Connected to [20+ EVM Chains](https://docs.scrt.network/secret-network-documentation/confidential-computing-layer/ethereum-evm-developer-toolkit/supported-networks)
-- 
+
 ## Secret Network Documentation
 See Secret Network documentation for a complete [guide](https://docs.scrt.network/secret-network-documentation/confidential-computing-layer/ethereum-evm-developer-toolkit/secretpath-ccl-sdk)
 

@@ -72,10 +72,10 @@ let upload_contract = async () => {
 }
 
 let instantiate_contract = async () => {
-  if (!codeId || !contractCodeHash) {
-    throw new Error("codeId or contractCodeHash is not set.")
-  }
-  console.log("Instantiating contract…")
+  // if (!codeId || !contractCodeHash) {
+  //   throw new Error("codeId or contractCodeHash is not set.")
+  // }
+  // console.log("Instantiating contract…")
 
   let init = {
     gateway_address: gatewayAddress,
@@ -84,28 +84,32 @@ let instantiate_contract = async () => {
   }
   let tx = await secretjs.tx.compute.instantiateContract(
     {
-      code_id: codeId,
+      code_id: 1725,
       sender: wallet.address,
-      code_hash: contractCodeHash,
+      code_hash: "81b04bfb2ca756e135201152081a113e4c333648e7088558777a2743f382c566",
       init_msg: init,
       label: "SecretPath RNG " + Math.ceil(Math.random() * 10000),
     },
     {
       gasLimit: 4_000_000,
-    }
-  )
+    })
+  // )
 
-  //Find the contract_address in the logs
-  const contractAddress = tx.arrayLog.find((log) => log.type === "message" && log.key === "contract_address").value
+  // //Find the contract_address in the logs
+  // const contractAddress = tx.arrayLog.find((log) => log.type === "message" && log.key === "contract_address").value
 
-  console.log("contract address: ", contractAddress)
+  // console.log("contract address: ", contractAddress)
+
+  console.log(tx)
 }
 
-// Chain the execution using promises
-upload_contract()
-  .then(() => {
-    instantiate_contract()
-  })
-  .catch((error) => {
-    console.error("Error:", error)
-  })
+instantiate_contract()
+
+// // Chain the execution using promises
+// upload_contract()
+//   .then(() => {
+//     instantiate_contract()
+//   })
+//   .catch((error) => {
+//     console.error("Error:", error)
+//   })

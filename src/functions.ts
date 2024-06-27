@@ -51,7 +51,7 @@ export async function requestRandomness(privateKey: string, endpoint: string, se
     gatewayPublicKey = "A20KrD7xDmkFXpNMqJn1CLpRaDLcdKpO1NdBBS7VpWh3";
     destination_network = "pulsar-3";
   } else if (network === "mainnet") {
-    routing_contract = "secret159xu6qntmpka6gfl67yyply4wf9xd6m7s23p2h";
+    routing_contract = "secret1j97fu60k8ehu0zumft9c69haakxdv7chdana8q";
     routing_code_hash = "81b04bfb2ca756e135201152081a113e4c333648e7088558777a2743f382c566";
     gatewayPublicKey = "AqDWMqzQ0vXaAvw4XqMKjeq01WOdGoIaOlUmJa0PF1nQ";
     destination_network = "secret-4";
@@ -214,13 +214,13 @@ export async function requestRandomness(privateKey: string, endpoint: string, se
     let destination_network;
   
     if (network === "testnet") {
-      routing_contract = "secret1t5fktxrmkzkw4a44ssuyc84per4hc0jk93gwnd";
-      routing_code_hash = "81b04bfb2ca756e135201152081a113e4c333648e7088558777a2743f382c566";
+      routing_contract = "secret1s79j3uaa0g49ncur884vv80ucz7hdwgltgke52";
+      routing_code_hash = "f0947ac3d0459bd5ccc24a43aa18762325f7582dc7919b4557ecf98b81345261";
       gatewayPublicKey = "A20KrD7xDmkFXpNMqJn1CLpRaDLcdKpO1NdBBS7VpWh3";
       destination_network = "pulsar-3";
     } else if (network === "mainnet") {
-      routing_contract = "secret159xu6qntmpka6gfl67yyply4wf9xd6m7s23p2h";
-      routing_code_hash = "81b04bfb2ca756e135201152081a113e4c333648e7088558777a2743f382c566";
+      routing_contract = "secret14pq7cpme92a3pc6ty0yjnprudmh7epacrphwr0";
+      routing_code_hash = "f0947ac3d0459bd5ccc24a43aa18762325f7582dc7919b4557ecf98b81345261";
       gatewayPublicKey = "AqDWMqzQ0vXaAvw4XqMKjeq01WOdGoIaOlUmJa0PF1nQ";
       destination_network = "secret-4";
     } else {
@@ -585,7 +585,7 @@ export async function requestRandomness(privateKey: string, endpoint: string, se
 
       chainId = "secret-4";
       url = "https://lcd.mainnet.secretsaturn.net";
-      contractAddress = "secret159xu6qntmpka6gfl67yyply4wf9xd6m7s23p2h"; 
+      contractAddress = "secret1j97fu60k8ehu0zumft9c69haakxdv7chdana8q"; 
       contractCodeHash = "81b04bfb2ca756e135201152081a113e4c333648e7088558777a2743f382c566";
     } else {
       console.log("Invalid network parameter. Please use 'testnet' or 'mainnet'.");

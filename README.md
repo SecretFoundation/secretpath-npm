@@ -35,7 +35,7 @@ Select the EVM chain that you want to use to execute the Secret Network smart co
 ```javascript
 let secretPathAddress = "0x3879E146140b627a5C858a08e507B171D9E43139";
 ```
-`encryptData` requires `privateKey`, `endpoint`, `secretPathAddress`, `data`, and `password` parameters:
+`encryptData` requires `privateKey`, `endpoint`, `secretPathAddress`, , `network`, `data`, and `password` parameters:
 
 ```javascript
 const { encryptData } = require('secret-network-ccl');
@@ -45,8 +45,10 @@ let endpoint = `https://sepolia.infura.io/v3/${process.env.INFURA_ENDPOINT}`;
 let secretPathAddress = "0x3879E146140b627a5C858a08e507B171D9E43139";
 let data = "I want to encrypt this data";
 let password = "password";
+let network = "testnet"
+//use "mainnet" for network if contract is deployed on Secret mainnet 
 
-encryptData(privateKey, endpoint, secretPathAddress, data, password);
+encryptData(privateKey, endpoint, secretPathAddress, network data, password);
 ```
 
 
@@ -58,7 +60,7 @@ Select the EVM chain that you want to use to execute the Secret Network smart co
 
 `let secretPathAddress = "0x3879E146140b627a5C858a08e507B171D9E43139"`
 
-`requestRandomness` requires `privateKey`, `endpoint`, `secretPathAddress`, `numbers`, and `max` parameters: 
+`requestRandomness` requires `privateKey`, `endpoint`, `secretPathAddress`, `network`, `numbers`, and `max` parameters: 
 
 `numbers` is the amount of numbers you want to request
 
@@ -72,8 +74,10 @@ let endpoint = `https://sepolia.infura.io/v3/${process.env.INFURA_ENDPOINT}`;
 let secretPathAddress = "0x3879E146140b627a5C858a08e507B171D9E43139";
 let numbers = "15";
 let max = "5"; 
+let network = "testnet"
+//use "mainnet" for network if contract is deployed on Secret mainnet 
 
-requestRandomness(privateKey, endpoint, secretPathAddress, numbers, max); 
+requestRandomness(privateKey, endpoint, secretPathAddress, network, numbers, max); 
 ```
 
 ## Executing Secret contracts
@@ -86,7 +90,7 @@ Select the EVM chain that you want to use to execute the Secret Network smart co
 
 For this example, we are going to execute the key value store contract on Secret Network.
 
-`executeSecretContract` requires the Secret `contractAddress`, `codeHash`, `handle` (ie the function you want to execute in the Secret Network contract), and any parameters needed for the handle function, which in this case is `data` and `password`.
+`executeSecretContract` requires the Secret `contractAddress`, `codeHash`, `network`,`handle` (ie the function you want to execute in the Secret Network contract), and any parameters needed for the handle function, which in this case is `data` and `password`.
 
 ```javascript
 const {executeSecretContract} = require('./node_modules/secret-network-ccl')
@@ -101,8 +105,10 @@ let secretPathAddress = "0x3879E146140b627a5C858a08e507B171D9E43139";
 let data = { key: "data", value: "moonbeam" }
 let password = { key: "password", value: "1234" };
 let handle = "request_encrypt";
+let network = "testnet"
+//use "mainnet" for network if contract is deployed on Secret mainnet 
 
-executeSecretContract( privateKey, endpoint, secretPathAddress, routing_contract, routing_code_hash, handle,  data,
+executeSecretContract( privateKey, endpoint, secretPathAddress, routing_contract, routing_code_hash, network, handle,  data,
   password); 
   ```
   
@@ -112,7 +118,7 @@ With `querySecretContract` you can query any SecretPath-compatible smart contrac
 
 For this example, we are going to query the key value store contract on Secret Network.
 
-`querySecretContract` requires the Secret `contractAddress`, `codeHash`, `handle` (ie the name of the query function you want to query in the Secret Network contract), and any parameters needed for the query, which in this case is `password`.
+`querySecretContract` requires the Secret `contractAddress`, `codeHash`, `network`, `handle` (ie the name of the query function you want to query in the Secret Network contract), and any parameters needed for the query, which in this case is `password`.
 
 ```javascript
 const {querySecretContract} = require('./node_modules/secret-network-ccl')
@@ -123,7 +129,9 @@ const contractAddress = "secret1s79j3uaa0g49ncur884vv80ucz7hdwgltgke52";
 const contractCodeHash = "f0947ac3d0459bd5ccc24a43aa18762325f7582dc7919b4557ecf98b81345261";
 let password = { password: "2" }
 let handle = "retrieve_data";
+let network = "testnet"
+//use "mainnet" for network if contract is deployed on Secret mainnet 
 
-querySecretContract(  contractAddress, contractCodeHash, handle,
+querySecretContract(  contractAddress, contractCodeHash, network, handle,
   password); 
   ```
